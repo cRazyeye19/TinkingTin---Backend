@@ -1,4 +1,5 @@
 import express from 'express';
+import authMiddleWare from '../middleware/AuthWare.js';
 import { deleteUser, getAllUsers, getUser, updateAssignee, updateUser } from '../controllers/UserController.js';
 
 const router = express.Router();
@@ -18,8 +19,8 @@ The configuration:
 */
 router.get('/users', getAllUsers)
 router.get('/:id', getUser)
-router.put('/:id', updateUser)
-router.put('/assign/:id', updateAssignee)
-router.delete('/:id', deleteUser)
+router.put('/:id', authMiddleWare, updateUser)
+router.put('/assign/:id', authMiddleWare, updateAssignee)
+router.delete('/:id', authMiddleWare, deleteUser)
 
 export default router
