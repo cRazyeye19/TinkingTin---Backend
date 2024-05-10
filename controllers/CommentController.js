@@ -143,3 +143,131 @@ export const addReply = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+/**
+ * This function handles GET requests to retrieve all replies for a comment
+ * with a specific ID.
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The replies array for the specified comment.
+ * If the comment is not found, a 404 error is returned.
+ * If the comment ID is not provided, a 400 error is returned.
+ * If there is an error, a 500 error is returned.
+ */
+export const getAllReplies = async (req, res) => {
+    try {
+        // Extract the comment ID from the request parameters.
+        const id = req.params.id;
+
+        // If the comment ID exists
+        if (id) {
+            // Find the comment by its ID.
+            const comment = await CommentModel.findById(id);
+
+            // If the comment is found
+            if (comment) {
+                // Return the replies array for the comment as a JSON response.
+                res.status(200).json(comment.replies);
+            } else {
+                // If the comment is not found, return a 404 error.
+                res.status(404).json({ message: "Comment not found" });
+            }
+        } else {
+            // If the comment ID is not provided, return a 400 error.
+            res.status(400).json({ message: "Comment ID is required" });
+        }
+    } catch (error) {
+        // If there's an error, return it as a JSON response.
+        res.status(500).json({ message: error.message });
+    }
+}
+
+/**
+ * This function handles PUT requests to edit a reply within a comment.
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The updated comment with the edited reply.
+ */
+export const editReply = async (req, res) => {
+    // Extract the comment ID and reply ID from the request parameters.
+    const id = req.params.id;
+    const replyId = req.params.replyId;
+
+    // Extract the updated reply text from the request body.
+    const { reply } = req.body;
+
+    try {
+        // Find the comment with the given ID.
+        const comment = await CommentModel.findById(id);
+
+        // If the comment is not found, return a 404 error.
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        // Find the index of the reply within the comment's replies array.
+        const replyIndex = comment.replies.findIndex(rep => rep._id.toString() === replyId);
+
+        // If the reply is not found, return a 404 error.
+        if (replyIndex === -1) {
+            return res.status(404).json({ message: "Reply not found" });
+        }
+
+        // Update the reply text within the comment's replies array.
+        comment.replies[replyIndex].reply = reply;
+
+        // Save the updated comment to the database.
+        const updatedComment = await comment.save();
+
+        // Return the updated comment as a JSON response.
+        res.status(200).json(updatedComment);
+    } catch (error) {
+        // If there's an error, return it as a JSON response.
+        res.status(500).json({ message: error.message });
+    }
+}
+
+/**
+ * This function handles DELETE requests to delete a reply within a comment.
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The updated comment without the deleted reply.
+ */
+export const deleteReply = async (req, res) => {
+    // Extract the comment ID and reply ID from the request parameters.
+    const id = req.params.id;
+    const replyId = req.params.replyId;
+
+    try {
+        // Find the comment with the given ID.
+        const comment = await CommentModel.findById(id);
+
+        // If the comment is not found, return a 404 error.
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        // Find the index of the reply within the comment's replies array.
+        const replyIndex = comment.replies.findIndex(reply => reply._id.toString() === replyId);
+
+        // If the reply is not found, return a 404 error.
+        if (replyIndex === -1) {
+            return res.status(404).json({ message: "Reply not found" });
+        }
+
+        // Remove the reply from the comment's replies array.
+        comment.replies.splice(replyIndex, 1);
+
+        // Save the updated comment to the database.
+        const updatedComment = await comment.save();
+
+        // Return the updated comment as a JSON response.
+        res.status(200).json(updatedComment);
+    } catch (error) {
+        // If there's an error, return it as a JSON response.
+        res.status(500).json({ message: error.message });
+    }
+}

@@ -1,5 +1,5 @@
 import express from 'express';
-import { addReply, createComment, deleteComment, getAllComments, getComment, updateComment } from '../controllers/CommentController.js';
+import { addReply, createComment, deleteComment, deleteReply, editReply, getAllComments, getAllReplies, getComment, updateComment } from '../controllers/CommentController.js';
 
 const router = express.Router();
 
@@ -13,7 +13,13 @@ router.get('/:id', getComment)
 router.put('/:id', updateComment)
 //DELETE request to delete a specific comment
 router.delete('/:id', deleteComment)
-//PUT request to add a reply
+//PUT request to add a reply on a comment
 router.put('/:id/reply', addReply)
+//GET request to get all replies for a comment
+router.get('/:id/replies', getAllReplies)
+//PUT request to edit a reply on a comment
+router.put('/:id/:replyId', editReply)
+//DELETE request to delete a reply on a comment
+router.delete('/:id/:replyId', deleteReply)
 
 export default router
