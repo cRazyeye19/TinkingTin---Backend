@@ -13,33 +13,33 @@ export const registerUser = async (req, res) => {
     try {
         // Generate a salt for password hashing
         const salt = await bcrypt.genSalt(10);
-        
+
         // Hash the user's password using the generated salt
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
-        
+
         // Replace the user's password in the request body with the hashed password
         req.body.password = hashedPassword;
-        
+
         // Create a new UserModel instance with the request body
         const newUser = new UserModel(req.body);
-        
+
         // Check if a user with the same username already exists
         const { username } = req.body;
         const oldUser = await UserModel.findOne({ username });
-        
+
         if (oldUser) {
             return res.status(400).json({ message: "User already exists" });
         }
-        
+
         // Save the new user to the database
         const user = await newUser.save();
-        
+
         // Generate a JSON Web Token (JWT) for authenticating the user
         const token = jwt.sign({
             username: user.username,
             id: user._id
         }, process.env.JWT_KEY, { expiresIn: "1h" });
-        
+
         // Respond with the user object and the generated token
         res.status(200).json({ user, token });
     } catch (error) {
@@ -57,10 +57,10 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
         const { username, password } = req.body;
-        
+
         // Find a user with the given username in the database
         const user = await UserModel.findOne({ username: username });
-        
+
         if (user) {
             // Verify the user's password
             const validity = await bcrypt.compare(password, user.password);
@@ -73,7 +73,7 @@ export const loginUser = async (req, res) => {
                     username: user.username,
                     id: user._id
                 }, process.env.JWT_KEY, { expiresIn: "1h" });
-                
+
                 // Respond with the user object and the generated token
                 res.status(200).json({ user, token });
             }
@@ -96,7 +96,7 @@ export const loginUser = async (req, res) => {
 export const resetPass = async (req, res) => {
     try {
         const { username } = req.body;
-        
+
         // Find a user with the given username in the database
         const user = await UserModel.findOne({ username: username });
 
@@ -106,38 +106,74 @@ export const resetPass = async (req, res) => {
 
         // Generate a JSON Web Token (JWT) for authenticating the password reset request
         const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, { expiresIn: "1h" });
-        
+
         // Set up the email transporter
-        var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'jlester.business.co@gmail.com',
-                pass: 'qpif mcck ythy tpve'
-            }
-        });
+        let transporter;
+        let mailOptions;
 
-        // Set up the email options
-        var mailOptions = {
-            from: 'jlester.business.co@gmail.com',
-            to: user.username,
-            subject: 'TinkingTin || Reset Password',
-            html: `
-            <p>Dear User,</p>
-            <p>Please click on the following link to reset your password:</p>
-            <p><a href="http://localhost:3000/reset-password/${user._id}/${token}">Reset Password</a></p>
-            <p>If you did not request a password reset, please ignore this email.</p>
-            <p>Note: This link will expire in 1 hour.</p>
-        `
-        };
+        // Check if the email domain is Gmail
+        if (user.username.endsWith('@gmail.com')) {
+            transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'jlester.business.co@gmail.com',
+                    pass: process.env.GMAIL_PASSWORD
+                }
+            });
 
-        // Send the email
+            mailOptions = {
+                from: 'jlester.business.co@gmail.com',
+                to: user.username,
+                subject: 'TinkingTin || Reset Password',
+                html: `
+                <p>Dear User,</p>
+                <p>Please click on the following link to reset your password:</p>
+                <p><a href="http://localhost:3000/reset-password/${user._id}/${token}">Reset Password</a></p>
+                <p>If you did not request a password reset, please ignore this email.</p>
+                <p>Note: This link will expire in 1 hour.</p>
+            `
+            };
+        }
+        // Check if the email domain is Outlook
+        else if (user.username.endsWith('@cit.edu')) {
+            transporter = nodemailer.createTransport({
+                host: "smtp-mail.outlook.com",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: 'johnlester.pansoy@cit.edu',
+                    pass: process.env.OUTLOOK_PASSWORD
+                }
+            });
+
+            mailOptions = {
+                from: 'johnlester.pansoy@cit.edu',
+                to: user.username,
+                subject: 'TinkingTin || Reset Password',
+                html: `
+                <p>Dear User,</p>
+                <p>Please click on the following link to reset your password:</p>
+                <p><a href="http://localhost:3000/reset-password/${user._id}/${token}">Reset Password</a></p>
+                <p>If you did not request a password reset, please ignore this email.</p>
+                <p>Note: This link will expire in 1 hour.</p>
+            `
+            };
+        }
+        else {
+            // Return an error if the email domain is neither Gmail nor Outlook
+            return res.status(400).json({ message: "Unsupported email domain" });
+        }
+
+        // Send the email using the determined transporter
         await transporter.sendMail(mailOptions);
+
         return res.status(200).json({ message: "Email sent" });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 }
+
 
 /**
  * Resets the user's password.
