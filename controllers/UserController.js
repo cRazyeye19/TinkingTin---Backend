@@ -73,24 +73,21 @@ export const updateUser = async (req, res) => {
     }
 }
 
-// This controller function handles PUT requests to update a user's assignee field.
+//This controller function handles PUT requests to update the assignee of a task.
 export const updateAssignee = async (req, res) => {
-
-    // Extract the ID from the request parameters.
+    // Extract the task ID from the request parameters.
     const id = req.params.id;
 
     try {
-        // Use the UserModel to find and update the user with the matching ID.
-        const user = await UserModel.findByIdAndUpdate(id, req.body, { new: true });
-        // If the user was not found, send a 404 response with an error message.
-        if(!user) return res.status(404).json({ message: "User not found" });
-
+        // Ensure that the _id field is not included in the update payload.
+        delete req.body._id;
         // Use the UserModel to find and update the user with the matching ID.
         const updatedUser = await UserModel.findByIdAndUpdate(id, req.body, { new: true });
-        
-        // Send a 200 response with the updated user.
+        // If the user was not found, send a 404 response with an error message.
+        if (!updatedUser) return res.status(404).json({ message: "User not found" });
+        // If the update was successful, send a 200 response with the updated user information.
         res.status(200).json(updatedUser);
-    }catch (error) {
+    } catch (error) {
         // If an error occurred, send a 500 response with an error message.
         res.status(500).json({ message: error.message });
     }

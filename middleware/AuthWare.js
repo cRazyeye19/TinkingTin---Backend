@@ -5,17 +5,20 @@ dotenv.config();
 const secret = process.env.JWT_KEY;
 const authMiddleWare = (req, res, next) => {
     try {
-        const token = req.headers.authorization.split(" ")[1];
-        console.log(token)
-        if (token) {
-            const decoded = jwt.verify(token, secret);
-            console.log(decoded)
-            req.body._id = decoded?.id;
+        const authorizationHeader = req.headers.authorization;
+        if (authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+            const token = authorizationHeader.split(" ")[1];
+            if (token) {
+                const decoded = jwt.verify(token, secret);
+                console.log(decoded);
+                req.body._id = decoded?.id;
+            }
         }
         next();
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        next(error);
     }
 }
 
-export default authMiddleWare
+export default authMiddleWare;
