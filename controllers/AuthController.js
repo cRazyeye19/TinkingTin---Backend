@@ -48,6 +48,23 @@ export const registerUser = async (req, res) => {
     }
 }
 
+export const searchUsers = async (req, res) => {
+    try {
+        const keyword = req.query.search ? {
+            $or: [
+                { username: { $regex: req.query.search, $options: "i" } },
+                { firstname: { $regex: req.query.search, $options: "i" } },
+                { lastname: { $regex: req.query.search, $options: "i" } }
+            ]
+        } : {};
+
+        const users = await UserModel.find({ _id: { $ne: req.user._id }, ...keyword }).select("-password");
+        res.send(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
 /**
  * Logs in a user.
  * 

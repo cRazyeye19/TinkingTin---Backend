@@ -6,12 +6,11 @@ const secret = process.env.JWT_KEY;
 const authMiddleWare = (req, res, next) => {
     try {
         const authorizationHeader = req.headers.authorization;
-        if (authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader && authorizationHeader.startsWith("Bearer")) {
             const token = authorizationHeader.split(" ")[1];
             if (token) {
                 const decoded = jwt.verify(token, secret);
-                console.log(decoded);
-                req.body._id = decoded?.id;
+                req.user = decoded;
             }
         }
         next();
