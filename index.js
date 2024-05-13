@@ -10,6 +10,7 @@ import UploadRoute from './routes/UploadRoute.js';
 import ForgotRoute from './routes/ForgotRoute.js';
 import ResetRoute from './routes/ResetRoute.js';
 import CommentRoute from './routes/CommentRoute.js';
+import ChatRoute from './routes/ChatRoute.js';
 
 /*
  * The "app" variable is an instance of the Express application.
@@ -114,3 +115,4 @@ app.use('/user', UserRoute) // Attach all routes defined in UserRoute to the '/u
 app.use('/ticket', TicketRoute) // Attach all routes defined in TicketRoute to the '/ticket' path.
 app.use('/upload', UploadRoute) // Attach all routes defined in UploadRoute to the '/upload' path.
 app.use('/comment', CommentRoute) // Attach all routes defined in CommentRoute to the '/comment' path.
+app.use('/chat', ChatRoute) // Attach all routes defined in ChatRoute to the '/chat' path.
