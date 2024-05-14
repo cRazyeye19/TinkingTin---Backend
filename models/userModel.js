@@ -17,11 +17,6 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    isAdmin: {
-        type: Boolean,
-        required : true,
-        default: false
-    },
     role: {
         type: String,
         default: "User"
@@ -30,6 +25,10 @@ const UserSchema = mongoose.Schema({
         type: String,
         default: "None"
     },
+    contacts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Users"
+    }],
     profilePicture : String,
     job: String,
     schoolId: String,
