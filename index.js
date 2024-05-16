@@ -12,6 +12,7 @@ import ResetRoute from './routes/ResetRoute.js';
 import CommentRoute from './routes/CommentRoute.js';
 import ChatRoute from './routes/ChatRoute.js';
 import MessageRoute from './routes/MessageRoute.js';
+import NotifRoute from './routes/NotifRoute.js';
 
 /*
  * The "app" variable is an instance of the Express application.
@@ -118,3 +119,4 @@ app.use('/upload', UploadRoute) // Attach all routes defined in UploadRoute to t
 app.use('/comment', CommentRoute) // Attach all routes defined in CommentRoute to the '/comment' path.
 app.use('/chat', ChatRoute) // Attach all routes defined in ChatRoute to the '/chat' path.
 app.use('/message', MessageRoute) // Attach all routes defined in MessageRoute to the '/message' path.
+app.use('/notification', NotifRoute) // Attach all routes defined in NotifRoute to the '/notification' path.
