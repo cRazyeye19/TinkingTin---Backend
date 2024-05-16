@@ -46,3 +46,15 @@ export const deleteNotif = async (req, res) => {
         res.status(500).json(error);
     }
 }
+
+export const deleteAllNotif = async (req, res) => {
+    // attempt to delete all notifications from the database
+    try {
+        const notifications = await NotifModel.deleteMany();
+        // if successful, return the deleted notifications with a 200 status
+        res.status(200).json(notifications);
+    } catch (error) {
+        // if there is an error, return the error with a 500 status
+        res.status(500).json(error);
+    }
+}

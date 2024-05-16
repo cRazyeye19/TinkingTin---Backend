@@ -1,6 +1,6 @@
 import express from 'express';
 import authMiddleWare from '../middleware/AuthWare.js';
-import { createNotif, deleteNotif, getNotifs } from '../controllers/NotificationController.js';
+import { createNotif, deleteAllNotif, deleteNotif, getNotifs } from '../controllers/NotificationController.js';
 
 const router = express.Router(); // creates a new router object which is an instance of express.Router
 
@@ -17,6 +17,11 @@ router.get('/notifs', // get request to retrieve all notifications for a user
 router.delete('/:id', // delete request to delete a notification by its id
   authMiddleWare, // requires a logged in user
   deleteNotif // calls the deleteNotif controller function to delete a notification by its id
+);
+
+router.delete('/', // delete request to delete all notifications for a user
+  authMiddleWare, // requires a logged in user
+  deleteAllNotif // calls the deleteNotif controller function to delete all notifications for a user
 );
 
 export default router;
