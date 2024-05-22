@@ -48,9 +48,18 @@ export const registerUser = async (req, res) => {
     }
 }
 
+/**
+ * Searches for users in the database based on a given keyword.
+ * 
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ */
 export const searchUsers = async (req, res) => {
     try {
+        // Get the search keyword from the query parameter
         const keyword = req.query.search ? {
+            // Create an array of regular expressions to search the username, firstname, and lastname
+            // fields for the given keyword. The regular expressions are case-insensitive.
             $or: [
                 { username: { $regex: req.query.search, $options: "i" } },
                 { firstname: { $regex: req.query.search, $options: "i" } },
@@ -58,9 +67,19 @@ export const searchUsers = async (req, res) => {
             ]
         } : {};
 
-        const users = await UserModel.find({ _id: { $ne: req.user._id }, ...keyword }).select("-password");
+        // Find users in the database that match the search keyword
+        // and are not the same user who is making the request
+        const users = await UserModel.find({
+            // Exclude the user who is making the request from the search results
+            _id: { $ne: req.user._id },
+            // Apply the search keyword to the query
+            ...keyword
+        }).select("-password");
+
+        // Respond with the search results
         res.send(users);
     } catch (error) {
+        // Respond with an error message if an error occurs
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
@@ -117,6 +136,7 @@ export const resetPass = async (req, res) => {
         // Find a user with the given username in the database
         const user = await UserModel.findOne({ username: username });
 
+        // Check if the user exists
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
